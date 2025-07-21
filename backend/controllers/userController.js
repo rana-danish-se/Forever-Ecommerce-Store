@@ -33,7 +33,7 @@ const loginUser = async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'User registered successfully',
+    message: 'Signed in successfully',
     token,
     user: {
       _id: user._id,
