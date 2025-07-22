@@ -6,7 +6,7 @@ import axios from 'axios';
 export const ShopContext = createContext();
 
 const ShopContextProvider = (props) => {
-  const[token,setToken]=useState('')
+  const [token, setToken] = useState('');
   const [products, setProducts] = useState([]);
   const backend_url = import.meta.env.VITE_BACKEND_URL;
   const currency = '$';
@@ -16,26 +16,68 @@ const ShopContextProvider = (props) => {
   const navigate = useNavigate();
 
   const [cartItems, setCartItems] = useState({});
-  const addToCart = async (itemId, size) => {
+
+  const addToCart = async (itemId, size,setLoading) => {
+    if (!token) {
+      toast.error('Please login first');
+      return false;
+    }
     if (!size) {
-      toast.error('Size not Selected');
-      return null;
+      toast.error('Please select a size');
+      return false;
     }
-    let cartData = structuredClone(cartItems);
 
-    if (cartData[itemId]) {
-      if (cartData[itemId][size]) {
-        cartData[itemId][size] += 1;
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${backend_url}/api/cart/add`,
+        { itemId, size },
+        {
+          headers: {
+            token: token,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        setLoading(false);
+        toast.success(response.data.message);
+        getUserCartData(token);
+        
+        return true;
       } else {
-        cartData[itemId][size] = 1;
+        setLoading(false);
+        toast.error(response.data.message);
+        return false;
       }
-    } else {
-      cartData[itemId] = {};
-      cartData[itemId][size] = 1;
+    } catch (error) {
+      setLoading(false);
+      toast.error(
+        error.response?.data?.message || error.message || 'Something went wrong'
+      );
+      return false;
     }
+  };
 
-    setCartItems(cartData);
-    toast.success('Added To Cart');
+  const getUserCartData = async (userToken) => {
+    try {
+      console.log("Getting cart data")
+      const response = await axios.post(
+        backend_url + '/api/cart/get',
+        {},
+        {
+          headers: {
+            token: userToken,
+          },
+        }
+      );
+      if (response.data.success) {
+        console.log(response.data.cartData)
+        setCartItems(response.data.cartData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getCartCount = () => {
@@ -53,10 +95,32 @@ const ShopContextProvider = (props) => {
     }
     return totalCount;
   };
-  const updateQuantity = async (id, size, quantity) => {
+
+  const updateQuantity = async (itemId, size, quantity) => {
     let copy = structuredClone(cartItems);
-    copy[id][size] = quantity;
+    copy[itemId][size] = quantity;
     setCartItems(copy);
+    if (token) {
+      try {
+        console.log('quantity is ' + quantity);
+        const response = await axios.post(
+          backend_url + '/api/cart/update',
+          { itemId, size, quantity },
+          {
+            headers: {
+              token,
+            },
+          }
+        );
+        if (response.data.success) {
+          toast.success('Cart Updated Successfully');
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
   };
   const getCartAmount = () => {
     let totalAmount = 0;
@@ -91,9 +155,7 @@ const ShopContextProvider = (props) => {
       const response = await axios.get(backend_url + '/api/product/list');
 
       if (response.data.success) {
-        console.log(response.data.products);
         setProducts(response.data.products);
-        console.log(products);
       } else {
         toast.error(response.data.message);
       }
@@ -105,6 +167,27 @@ const ShopContextProvider = (props) => {
   useEffect(() => {
     getProductsData();
   }, []);
+
+  // useEffect(() => {
+  //   if (!token && localStorage.getItem('user_token')) {
+  //     setToken(localStorage.getItem('user_token'));
+  //     getUserCartData(localStorage.getItem('user_token'));
+  //   }
+  // }, [token]);
+  // 1. Set token from localStorage (runs only once)
+  useEffect(() => {
+    const savedToken = localStorage.getItem('user_token');
+    if (savedToken) {
+      setToken(savedToken);
+    }
+  }, []);
+
+  // 2. When token updates, get the cart
+  useEffect(() => {
+    if (token) {
+      getUserCartData(token);
+    }
+  }, [token]);
 
   const value = {
     products,
@@ -123,7 +206,8 @@ const ShopContextProvider = (props) => {
     backend_url,
     token,
     setToken,
-    setCartItems
+    setCartItems,
+    getUserCartData,
   };
   return (
     <ShopContext.Provider value={value}>{props.children}</ShopContext.Provider>

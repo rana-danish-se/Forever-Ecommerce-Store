@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import Home from './pages/Home';
 import Collections from './pages/Collections';
 import About from './pages/About';
@@ -8,17 +8,20 @@ import Cart from './pages/Cart';
 import Login from './pages/Login';
 import PlaceOrder from './pages/PlaceOrder';
 import Orders from './pages/Orders';
+import Verify from './pages/Verify';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footor from './components/Footor';
 import SearchBox from './components/SearchBox';
 import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
+import { ShopContext } from './context/ShopContext';
 const App = () => {
   const location = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location.pathname]);
+
 
   return (
     <div className="px-4 sm:px-[5vw] md:[7px] lg:px-[9vw]">
@@ -35,6 +38,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/verify" element={<Verify />} />
       </Routes>
       <Footor />
     </div>
