@@ -168,13 +168,7 @@ const ShopContextProvider = (props) => {
     getProductsData();
   }, []);
 
-  // useEffect(() => {
-  //   if (!token && localStorage.getItem('user_token')) {
-  //     setToken(localStorage.getItem('user_token'));
-  //     getUserCartData(localStorage.getItem('user_token'));
-  //   }
-  // }, [token]);
-  // 1. Set token from localStorage (runs only once)
+  // Load token from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem('user_token');
     if (savedToken) {
@@ -182,7 +176,7 @@ const ShopContextProvider = (props) => {
     }
   }, []);
 
-  // 2. When token updates, get the cart
+  // Sync cart data when token is available
   useEffect(() => {
     if (token) {
       getUserCartData(token);

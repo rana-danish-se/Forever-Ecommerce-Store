@@ -8,7 +8,8 @@ const deliveryCharges = 10;
 
 const placeOrder = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const { items, amount, address } = req.body;
+    const userId = req.userId;
     const orderData = {
       userId,
       items,
@@ -27,7 +28,7 @@ const placeOrder = async (req, res) => {
     });
   } catch (error) {
     res.json({
-      success: true,
+      success: false,
       message: error.message,
     });
   }
@@ -35,7 +36,8 @@ const placeOrder = async (req, res) => {
 
 const placeOrderStripe = async (req, res) => {
   try {
-    const { userId, items, amount, address } = req.body;
+    const { items, amount, address } = req.body;
+    const userId = req.userId;
     const { origin } = req.headers;
     const orderData = {
       userId,
@@ -90,7 +92,8 @@ const placeOrderStripe = async (req, res) => {
   }
 };
 const verifyStripe = async (req, res) => {
-  const { orderId, success, userId } = req.body;
+  const { orderId, success } = req.body;
+  const userId = req.userId;
   try {
     if (success === 'true') {
       await orderModel.findByIdAndUpdate(orderId, { payment: true });
@@ -122,14 +125,14 @@ const allOrders = async (req, res) => {
     });
   } catch (error) {
     res.json({
-      success: true,
+      success: false,
       message: error.message,
     });
   }
 };
 const userOrders = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.userId;
     const orders = await orderModel.find({ userId: userId });
     res.json({
       success: true,

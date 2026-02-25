@@ -209,7 +209,7 @@ const Add = ({ token }) => {
               <p
                 className={`px-3 py-1 cursor-pointer rounded ${
                   selectedSizes.includes(size)
-                    ? 'border bg-red-100 text-gray-400'
+                    ? 'bg-pink-100 border border-pink-400'
                     : 'bg-slate-200'
                 }`}
               >

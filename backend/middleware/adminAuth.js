@@ -9,13 +9,18 @@ const adminAuth = async (req, res, next) => {
       message: 'User not authorized',
     });
   }
-  const token_decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
-  if (token_decode !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
-    return res.json({
-      success: false,
-      message: 'User not authorized',
-    });
-  }
+    const token_decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    
+    // Check if the payload is what we expect (either string or object)
+    const expectedPayload = process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD;
+    const actualPayload = typeof token_decode === 'object' ? token_decode.id : token_decode;
+
+    if (actualPayload !== expectedPayload) {
+      return res.json({
+        success: false,
+        message: 'User not authorized',
+      });
+    }
   next();
   } catch (error) {
     res.json({

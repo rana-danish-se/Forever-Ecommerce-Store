@@ -20,13 +20,11 @@ const Product = () => {
 
 
   useEffect(() => {
-    products.map((item) => {
-      if (item._id === productId) {
-        setProduct(item);
-        setMainImage(item.image[0]);
-        return null;
-      }
-    });
+    const item = products.find((item) => item._id === productId);
+    if (item) {
+      setProduct(item);
+      setMainImage(item.image[0]);
+    }
   }, [productId, products]);
 
 
