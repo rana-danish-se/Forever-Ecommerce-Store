@@ -20,7 +20,7 @@ connectCloudinary();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  'https://forever-ecommerce-store-frontend.vercel.app' // Example production URL, adjustment might be needed
+  'https://forever-ecommerce-store.vercel.app' 
 ];
 
 app.use(cors({
